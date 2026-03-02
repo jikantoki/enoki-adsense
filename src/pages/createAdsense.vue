@@ -18,6 +18,8 @@ v-card(
       style="background-color: rgb(var(--v-theme-primary)); color: white;"
       ) 作成
   v-card-text(style="height: inherit; overflow-y: auto;")
+    p 広告画像（4枚まで挿入できます）
+    p 広告画像は、1秒ごとに切り替わります。
     .imgs
       .cover.my-4(
         v-for="content in form.contents"
@@ -36,53 +38,39 @@ v-card(
             style="opacity: 0.7;"
           ) mdi-camera-flip
       .cover.my-4(
+        v-if="form.contents.length < 4"
       )
         .cover-img(
           )
         .change-cover-button(
           style="font-size: 2em;"
           v-ripple
-          @click="form.contents.push()"
+          @click="form.contents.push('')"
           )
           v-icon(
             style="opacity: 0.7;"
           ) mdi-camera-flip
     .text-form
       v-text-field(
-        name="id"
-        label="ID"
-        disabled
-        v-model="myProfile.userId"
-      )
-      v-text-field(
-        name="name"
-        label="ニックネーム"
-        placeholder="名前を入力してください"
-        v-model="myProfile.name"
+        name="広告タイトル"
+        label="広告タイトル"
+        placeholder="新しい広告"
+        v-model="form.title"
       )
       v-textarea(
-        label="自己紹介"
-        placeholder="趣味は色々です"
+        label="広告の説明文"
+        placeholder="広告の説明文を入力してください"
         clearable
         auto-grow
-        v-model="myProfile.message"
+        v-model="form.description"
       )
-      p(
-        v-show="settings.developerOptions.enabled"
-      ) 開発者オプション
-      v-text-field(
-        name="icon"
-        label="アイコンのURL"
-        placeholder="https://icon.com/icon.png"
-        v-model="myProfile.icon"
-        v-show="settings.developerOptions.enabled"
+      v-date-input(
+        label="広告の開始日時"
+        v-model="form.startDate"
       )
-      v-text-field(
-        name="coverImg"
-        label="カバー画像のURL"
-        placeholder="https://cover.com/cover.png"
-        v-model="myProfile.coverImg"
-        v-show="settings.developerOptions.enabled"
+      v-date-input(
+        label="広告の終了日時"
+        v-model="form.endDate"
       )
 v-dialog(
   v-model="cancelDialog"
@@ -117,11 +105,15 @@ v-dialog(
   import { App } from '@capacitor/app'
 
   import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+  import { VDateInput } from 'vuetify/labs/VDateInput'
   import mixins from '@/mixins/mixins'
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
 
   export default {
+    components: {
+      VDateInput,
+    },
     mixins: [mixins],
     data () {
       return {
@@ -129,13 +121,23 @@ v-dialog(
         cancelDialog: false,
         saveDialog: false,
         settings: useSettingsStore(),
-        form: {} as Adsense,
+        form: {
+          adsenseId: '',
+          authorUserId: '',
+          title: '',
+          description: '',
+          startDate: new Date(),
+          endDate: new Date(),
+          jumpUrl: '',
+          contents: [] as string[],
+        } as Adsense,
       }
     },
     async mounted () {
       App.addListener('backButton', () => {
         this.cancelDialog = this.cancelDialog ? false : true
       })
+      this.form.authorUserId = this.myProfile.userId
     },
     unmounted () {
       App.removeAllListeners()
@@ -242,13 +244,12 @@ v-dialog(
 }
 .cover {
   width: 100%;
-  height: 12em;
   position: relative;
   border-radius: 16px;
   overflow: hidden;
   .cover-img {
     width: 100%;
-    height: 12em;
+    aspect-ratio: 45/9;
   }
   .change-cover-button {
     position: absolute;
@@ -265,24 +266,6 @@ v-dialog(
     align-items: center;
     cursor: pointer;
     color: #FFFFFF;
-  }
-}
-.icon-cover{
-  margin-top: -36px;
-  z-index: 5;
-  position: sticky;
-  .icon {
-    border-radius: 9999px;
-    height: 72px;
-    width: 72px;
-    .icon-img {
-      border-radius: 9999px;
-      width: 72px;
-      height: 72px;
-    }
-    .change-icon-button {
-      border-radius: 9999px;
-    }
   }
 }
 </style>
