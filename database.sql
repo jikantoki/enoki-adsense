@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: localhost
--- 生成日時: 2026 年 1 月 04 日 09:33
+-- 生成日時: 2026 年 3 月 02 日 13:56
 -- サーバのバージョン： 5.7.44-log
 -- PHP のバージョン: 7.4.33
 
@@ -11,12 +11,20 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+-- --------------------------------------------------------
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+--
+-- テーブルの構造 `ads_list`
+--
 
+CREATE TABLE `ads_list` (
+  `adsenseId` varchar(64) NOT NULL COMMENT '広告管理ID',
+  `authorUserRandId` varchar(64) NOT NULL COMMENT '広告主ユーザーrandId',
+  `contentsJson` text NOT NULL COMMENT '広告に使うデータ',
+  `jumpUrl` text NOT NULL COMMENT 'クリック時にジャンプするURL',
+  `startDate` date NOT NULL COMMENT '広告掲載スタート日',
+  `endDate` int(11) NOT NULL COMMENT '広告掲載終了日'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='広告リスト';
 
 -- --------------------------------------------------------
 
@@ -248,6 +256,12 @@ CREATE VIEW `USER_TOKEN_VIEW`  AS SELECT `user_list`.`secretId` AS `secretId`, `
 --
 
 --
+-- テーブルのインデックス `ads_list`
+--
+ALTER TABLE `ads_list`
+  ADD PRIMARY KEY (`adsenseId`);
+
+--
 -- テーブルのインデックス `api_list`
 --
 ALTER TABLE `api_list`
@@ -314,7 +328,3 @@ ALTER TABLE `user_profile_list`
 ALTER TABLE `user_secret_list`
   ADD PRIMARY KEY (`secretId`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
