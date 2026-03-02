@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- ホスト: localhost
--- 生成日時: 2026 年 3 月 02 日 13:56
+-- 生成日時: 2026 年 3 月 02 日 14:27
 -- サーバのバージョン： 5.7.44-log
 -- PHP のバージョン: 7.4.33
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 CREATE TABLE `ads_list` (
   `adsenseId` varchar(64) NOT NULL COMMENT '広告管理ID',
   `authorUserRandId` varchar(64) NOT NULL COMMENT '広告主ユーザーrandId',
+  `adsenseTitle` text COMMENT '広告のタイトル',
+  `adsenseDescription` text COMMENT '広告の説明',
   `contentsJson` text NOT NULL COMMENT '広告に使うデータ',
   `jumpUrl` text NOT NULL COMMENT 'クリック時にジャンプするURL',
   `startDate` date NOT NULL COMMENT '広告掲載スタート日',

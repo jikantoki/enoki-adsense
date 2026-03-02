@@ -10,21 +10,9 @@ v-card(
   v-card-text(style="height: inherit; overflow-y: auto;")
     .wrap.my-4
       v-btn(
-        @click="a('https://github.com/jikantoki/enoki-adsense')"
+        @click="$router.push('/createAdsense')"
         style="background-color: rgb(var(--v-theme-primary)); color: white;"
-        ) Github
-    .wrap
-      v-card.content(elevation="4")
-        .text-h4 綺麗で美しい
-        hr
-        .text NuxTempで理想の作業効率化
-    .wrap
-      v-card.content(elevation="4")
-        .text-h4 画像だって表示可能
-        hr
-        p このコンポーネントを使えば、エモい感じで画像を簡単に表示できます
-        .img-wrap.my-4
-          img.big-img(src="/icon.png" height="128")
+        ) Create Adsense
   //-- 下部のアクションバー --
   .action-bar
     .buttons
