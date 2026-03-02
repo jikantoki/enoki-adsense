@@ -1,4 +1,4 @@
-package xyz.enoki.capacitor.template;
+package xyz.enoki.adsense;
 
 import com.getcapacitor.BridgeActivity;
 

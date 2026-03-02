@@ -71,7 +71,7 @@
     //-.createdat.mx-2(v-show="!loading")
       p(
         v-if="userData && userData.status != 'ng'"
-        ) {{ new Date(userData.createdAt * 1000) }}からCapacitor Templateを利用しています
+        ) {{ new Date(userData.createdAt * 1000) }}からEnoki Adsenseを利用しています
     //.share-and-sns-links.px-2(v-show="userData")
       .share-buttons
         v-btn.mx-2(
@@ -220,9 +220,8 @@ v-dialog(v-model="followDialogMessage")
 
 <script lang="ts">
   import { App } from '@capacitor/app'
-  import { Clipboard } from '@capacitor/clipboard'
   import { Share } from '@capacitor/share'
-  import QRCode from 'qrcode'
+  import * as QRCode from 'qrcode'
   import mixins from '@/mixins/mixins'
   import { useMyProfileStore } from '@/stores/myProfile'
 
@@ -274,7 +273,7 @@ v-dialog(v-model="followDialogMessage")
         this.userData = JSON.parse(localUserData)
       }
 
-      this.myLink = `https://capacitor-template.enoki.xyz/user/${userId}?openExternalBrowser=1`
+      this.myLink = `https://ads.enoki.xyz/user/${userId}?openExternalBrowser=1`
 
       setTimeout(() => {
         const canvas = document.querySelector('#qr-canvas') as HTMLCanvasElement
@@ -385,7 +384,7 @@ v-dialog(v-model="followDialogMessage")
         //   string: content,
         // })
         await Share.share({
-          title: 'Capacitor Templateで位置情報を共有しよう',
+          title: 'Enoki Adsenseで位置情報を共有しよう',
           url: content,
         })
       },

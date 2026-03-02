@@ -26,22 +26,22 @@ v-card(
         v-btn.mr-2(
           text
           append-icon="mdi-github"
-          @click="openURL('https://github.com/jikantoki/capacitor-template')"
+          @click="openURL('https://github.com/jikantoki/enoki-adsense')"
         ) Github
         v-btn.ml-2(
           text
           append-icon="mdi-web"
-          @click="openURL('https://capacitor-template.enoki.xyz')"
+          @click="openURL('https://ads.enoki.xyz')"
         ) ホームページ
     .settings-list
       .setting-item(
         v-ripple
-        @click="openURL('https://capacitor-template.enoki.xyz')"
+        @click="openURL('https://ads.enoki.xyz')"
         )
         .icon
           v-icon mdi-application-outline
         .text
-          p.title Capacitor Template
+          p.title Enoki Adsense
           p.description &copy; 2019 エノキ電気
       .setting-item(
         v-ripple
@@ -51,7 +51,7 @@ v-card(
           v-icon mdi-information-outline
         .text
           p.title バージョン情報
-          p.description v{{ packageJson.version }}
+          p.description v1.0.0
       .setting-item(
         v-if="settings.developerOptions.enabled"
         v-ripple
@@ -136,12 +136,10 @@ v-card(
   import { Device } from '@capacitor/device'
   import { Toast } from '@capacitor/toast'
   import { useSettingsStore } from '@/stores/settings'
-  import PackageJson from '../../package.json'
 
   export default {
     data () {
       return {
-        packageJson: PackageJson,
         developerOptionClickCount: 0,
         settings: useSettingsStore(),
       }
