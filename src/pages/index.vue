@@ -175,21 +175,6 @@ v-card(
               style="background-color: rgb(var(--v-theme-primary)); color: white;"
             ) ログイン
         v-list.options-list
-          v-list-item.item( @click="searchFriendDialog = true" )
-            .icon-and-text
-              v-icon mdi-magnify
-              v-list-item-title 友達を探す
-          v-list-item.item( @click="$router.push('qrcode')" )
-            .icon-and-text
-              v-icon mdi-qrcode-scan
-              v-list-item-title QRコードで友達を探す
-          v-list-item.item(
-            @click="$router.push('/friendlist')"
-            v-show="myProfile && myProfile.userId"
-          )
-            .icon-and-text
-              v-icon mdi-account-multiple
-              v-list-item-title 友達リスト
           v-list-item.item( @click="$router.push('/settings')" )
             .icon-and-text
               v-icon mdi-cog
@@ -206,26 +191,10 @@ v-card(
             .icon-and-text
               v-icon mdi-information
               v-list-item-title このアプリについて
-          v-list-item.item( @click="share('https://play.google.com/store/apps/dev?id=8940000495375956936', 'エノキ電気')" )
+          v-list-item.item( @click="share('https://play.google.com/store/apps/details?id=xyz.enoki.adsense', 'Enoki Adsense')" )
             .icon-and-text
               v-icon mdi-share-variant
               v-list-item-title このアプリを共有する
-  v-dialog(
-    v-model="acceptDialog"
-    persistent
-  )
-    v-card
-      v-card-title 友達リクエストが来ています！
-      v-card-text
-        p {{ acceptList.length }}人の友達があなたを待っています。承認してつながろう！
-      v-card-actions
-        v-btn(
-          @click="acceptDialog = false"
-        ) やめとく
-        v-btn(
-          @click="$router.push('/friendlist')"
-          style="background-color: rgb(var(--v-theme-primary)); color: white"
-        ) リクエストを見る
 </template>
 
 <script lang="ts">
@@ -321,34 +290,11 @@ v-card(
         } else if (this.$route.path === '/') {
           /** ルートページならアプリを最小化 */
           App.minimizeApp()
-          Toast.show({ text: 'アプリはバックグラウンドで実行されます' })
         } else {
           /** ルート以外のページなら1つ戻る */
           this.$router.back()
         }
       })
-
-      // 承認していない友達リクエストがあったらポップアップを表示
-      const res: any = await this.sendAjaxWithAuth('/getMyFriendList.php', {
-        id: this.myProfile.userId,
-        token: this.myProfile.userToken,
-        withLocation: true,
-      })
-      if (res && res.body) {
-        const allFriendList: any[] = res.body.friendList
-        this.acceptList = []
-        if (allFriendList && allFriendList[0]) {
-          for (const friend of allFriendList) {
-            friend.friendProfile.userId = friend.friendRealId
-            if (friend.status == 'request' && friend.fromUserId != res.body.mySecretId) {
-              this.acceptList.push(friend.friendProfile)
-            }
-          }
-        }
-      }
-      if (this.acceptList.length > 0 && history.length <= 2) {
-        this.acceptDialog = true
-      }
     },
     unmounted () {
       App.removeAllListeners()
@@ -384,39 +330,9 @@ v-card(
           return `${Math.floor(diff / 60 / 60 / 24)}日前`
         }
       },
-      openGoogleMaps (latlng: [
-        number, number,
-      ]) {
-        this.openURL(
-          `https://www.google.com/maps/search/?api=1&query=${latlng[0]},${latlng[1]}`,
-        )
-      },
       /** URLをブラウザで開く */
       async openURL (url: string) {
         await Browser.open({ url: url })
-      },
-      /** 友達を検索 */
-      async searchFriend (searchId: string) {
-        searchId = searchId.replace('@', '')
-        this.searchFriendLoading = true
-        if (!searchId) {
-          this.searchFriendErrorMessage = '検索するIDを入力してください'
-          this.searchFriendLoading = false
-          return
-        }
-        const userData = await this.getProfile(
-          searchId,
-          this.myProfile.userId,
-          this.myProfile.userToken,
-        )
-        if (userData) {
-          this.$router.push(`/user/${userData.userId}`)
-        } else {
-          this.searchFriendErrorMessage = '友達が見つかりませんでした'
-          this.searchFriendLoading = false
-          return
-        }
-        this.searchFriendLoading = false
       },
       /**
        * 2つのDateオブジェクトの差が10秒以内か判定する
