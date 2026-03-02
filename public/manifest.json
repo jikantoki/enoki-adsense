@@ -67,7 +67,7 @@
   "shortcuts": [
     {
       "name": "メインページ",
-      "description": "地図を表示します",
+      "description": "Enoki Adsenseのメインページを開きます。",
       "url": "/",
       "icons": [
         {
