@@ -22,7 +22,7 @@ v-card(
     p 広告画像は、1秒ごとに切り替わります。
     .imgs
       .cover.my-4(
-        v-for="content in form.contents"
+        v-for="(content, cnt) in form.contents"
         :key="content"
       )
         img.cover-img(
@@ -32,7 +32,7 @@ v-card(
         .change-cover-button(
           style="font-size: 2em;"
           v-ripple
-          @click="changeCover()"
+          @click="changeImage(cnt)"
           )
           v-icon(
             style="opacity: 0.7;"
@@ -45,11 +45,11 @@ v-card(
         .change-cover-button(
           style="font-size: 2em;"
           v-ripple
-          @click="form.contents.push('')"
+          @click="changeImage(form.contents.length)"
           )
           v-icon(
             style="opacity: 0.7;"
-          ) mdi-camera-flip
+          ) mdi-camera-plus
     .text-form
       v-text-field(
         name="広告タイトル"
@@ -101,12 +101,13 @@ v-dialog(
 </template>
 
 <script lang="ts">
-  import type { Adsense } from '@/stores/adsense'
   import { App } from '@capacitor/app'
-
   import { Camera, CameraResultType, CameraSource } from '@capacitor/camera'
+
+  import { Capacitor } from '@capacitor/core'
   import { VDateInput } from 'vuetify/labs/VDateInput'
   import mixins from '@/mixins/mixins'
+  import { type Adsense, useAdsenseStore } from '@/stores/adsense'
   import { useMyProfileStore } from '@/stores/myProfile'
   import { useSettingsStore } from '@/stores/settings'
 
@@ -121,6 +122,7 @@ v-dialog(
         cancelDialog: false,
         saveDialog: false,
         settings: useSettingsStore(),
+        useAdsenseStore: useAdsenseStore(),
         form: {
           adsenseId: '',
           authorUserId: '',
@@ -152,26 +154,37 @@ v-dialog(
             id: this.myProfile?.userId,
             token: this.myProfile?.userToken,
           }, {
-            icon: this.myProfile?.icon,
-            coverImg: this.myProfile?.coverImg,
-            name: this.myProfile?.name,
-            message: this.myProfile?.message,
+            // authorsUserIdはサーバー側で自動的に設定されるため、送信する必要はない
+            // adsenseIdもサーバー側で自動的に設定されるため、送信する必要はない
+            title: this.form.title,
+            description: this.form.description,
+            startDate: this.form.startDate,
+            endDate: this.form.endDate,
+            jumpUrl: this.form.jumpUrl,
+            contents: JSON.stringify(this.form.contents),
           })
-          let iconUrl = null
-          let coverImgUrl = null
+          /**
+           * サーバーから返されるcontentsImgUrlは、
+           * サーバー側で保存された画像のURLの配列です。
+           * クライアント側で送信したform.contentsは、
+           * base64エンコードされた画像の配列ですが、
+           * サーバー側で保存された画像のURLに置き換える必要があります。
+           * そのため、サーバーから返されるcontentsImgUrlを使用して、
+           * form.contentsを更新する必要があります。
+           * もしサーバーからcontentsImgUrlが返されない場合は、
+           * form.contentsを空の配列にするか、base64エンコードされた画像のままにするかは、要件に応じて決定してください。
+           */
+          let contentsImgUrl = []
           if (res && res.body) {
-            iconUrl = res.body.iconUrl
-            coverImgUrl = res.body.coverImgUrl
+            contentsImgUrl = res.body.contentsImgUrl
           }
 
-          /** iconとcoverImgはURLを格納する */
-          this.myProfile = {
-            ...this.myProfile,
-            icon: iconUrl,
-            coverImg: coverImgUrl,
-          }
-          const textProfile = JSON.stringify(this.myProfile)
-          localStorage.setItem('profile', textProfile)
+          /** contentsはURLを格納する */
+          this.useAdsenseStore.myAdsenses.push({
+            ...this.form,
+            adsenseId: res.body.adsenseId,
+            contents: contentsImgUrl,
+          })
         } catch (error) {
           if (this.settings.developerOptions.enabled) {
             alert(error)
@@ -181,10 +194,13 @@ v-dialog(
         this.$router.back()
       },
       /** カバー画像の変更 */
-      async changeCover () {
-        const permission = await Camera.checkPermissions()
-        if (permission.camera !== 'granted' || permission.photos !== 'granted') {
-          await Camera.requestPermissions()
+      async changeImage (index: number) {
+        const platform = Capacitor.getPlatform()
+        if (platform !== 'web') {
+          const permission = await Camera.checkPermissions()
+          if (permission.camera !== 'granted' || permission.photos !== 'granted') {
+            await Camera.requestPermissions()
+          }
         }
         const image = await Camera.getPhoto({
           quality: 100,
@@ -200,32 +216,11 @@ v-dialog(
           promptLabelPicture: '撮影',
         })
         const base64 = image.dataUrl
-        if (this.myProfile) {
-          this.myProfile.coverImg = base64 ?? null
+        if (!base64) {
+          return
         }
-      },
-      /** アイコンの変更 */
-      async changeIcon () {
-        const permission = await Camera.checkPermissions()
-        if (permission.camera !== 'granted' || permission.photos !== 'granted') {
-          await Camera.requestPermissions()
-        }
-        const image = await Camera.getPhoto({
-          quality: 100,
-          resultType: CameraResultType.DataUrl,
-          allowEditing: false,
-          saveToGallery: false,
-          width: 1600,
-          height: 1600,
-          source: CameraSource.Photos,
-          promptLabelHeader: '写真を使う',
-          promptLabelCancel: 'キャンセル',
-          promptLabelPhoto: 'アルバムから選択',
-          promptLabelPicture: '撮影',
-        })
-        const base64 = image.dataUrl
         if (this.myProfile) {
-          this.myProfile.icon = base64 ?? null
+          this.form.contents[index] = base64
         }
       },
       /** プロフィール編集をキャンセル */
